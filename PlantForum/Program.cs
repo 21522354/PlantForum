@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using PlantForum.Data;
+
 namespace PlantForum
 {
     public class Program
@@ -13,6 +16,11 @@ namespace PlantForum
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddDbContext<PlanForumDBContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("PlanForumDB"));
+            });
+            builder.Services.AddAutoMapper(typeof(Program));    
 
             var app = builder.Build();
 
