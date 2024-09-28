@@ -1,0 +1,6 @@
+@PlantForum_HostAddress = http://localhost:5139
+
+GET {{PlantForum_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
