@@ -1,6 +1,9 @@
-
+﻿
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PlantForum.Data;
+using System.Text;
 
 namespace PlantForum
 {
@@ -20,7 +23,30 @@ namespace PlantForum
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("PlanForumDB"));
             });
-            builder.Services.AddAutoMapper(typeof(Program));    
+            builder.Services.AddAutoMapper(typeof(Program));
+
+            #region configure JWT
+            var secretKey = builder.Configuration["AppSettings:SecretKey"];
+            var secterKeyByte = Encoding.UTF8.GetBytes(secretKey);
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        // tự cấp token nên validate = false
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        // có thể sử dụng các dịch vụ cấp token như OAuth2
+
+                        // ký vào token
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(secterKeyByte),
+
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+            #endregion
 
             var app = builder.Build();
 
