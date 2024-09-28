@@ -25,9 +25,9 @@ namespace PlantForum.Controllers
 
 
         [HttpPost("Register")]
-        public IActionResult Register(string username, string password)
+        public async Task<IActionResult> Register(string username, string password)
         {
-            var existUser = _context.Users.Where(p => p.UserName == username).FirstOrDefault();
+            var existUser = await _context.Users.Where(p => p.UserName == username).FirstOrDefaultAsync();
             if (existUser != null)
             {
                 return BadRequest("This username is already exist");
@@ -38,19 +38,19 @@ namespace PlantForum.Controllers
             user.Password = password;
             _context.Users.Add(user);
             _context.SaveChanges();
-            var token = GenerateToken(user);    
-            return Ok(token);
+            var token = GenerateToken(user);
+            return Ok(new APIRespond() { UserId = user.id, AccessToken = token });
         }
         [HttpPost("Login")]
-        public IActionResult Login(string username, string password)
+        public async Task<IActionResult> Login(string username, string password)
         {
-            var user = _context.Users.Where(p => p.UserName == username && p.Password == password).FirstOrDefault();
+            var user = await _context.Users.Where(p => p.UserName == username && p.Password == password).FirstOrDefaultAsync();
             if(user == null)
             {
                 return BadRequest("Wrong username or password");
             }
             var token = GenerateToken(user);
-            return Ok(token);
+            return Ok(new APIRespond() { UserId = user.id, AccessToken = token});
         }
 
         private string GenerateToken(User user)
@@ -81,5 +81,10 @@ namespace PlantForum.Controllers
             return accessToken;
 
         }
+    }
+    public class APIRespond
+    {
+        public Guid UserId { get; set; }
+        public string AccessToken { get; set; }     
     }
 }

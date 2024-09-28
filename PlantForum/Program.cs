@@ -23,7 +23,7 @@ namespace PlantForum
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("PlanForumDB"));
             });
-            builder.Services.AddAutoMapper(typeof(Program));
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             #region configure JWT
             var secretKey = builder.Configuration["AppSettings:SecretKey"];
