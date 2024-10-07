@@ -1,7 +1,7 @@
-﻿
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
 using PlantForum.Data;
 using System.Text;
 
@@ -24,6 +24,14 @@ namespace PlantForum
                 options.UseSqlServer(builder.Configuration.GetConnectionString("PlanForumDB"));
             });
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            // Register API versioning
+            builder.Services.AddApiVersioning(o =>
+            {
+                o.AssumeDefaultVersionWhenUnspecified = true;
+                o.DefaultApiVersion = new ApiVersion(1, 0);
+                o.ReportApiVersions = true;
+            });
 
             #region configure JWT
             var secretKey = builder.Configuration["AppSettings:SecretKey"];
