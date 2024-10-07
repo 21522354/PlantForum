@@ -6,6 +6,7 @@ using PlantForum.Data;
 using System.Text;
 using Microsoft.AspNetCore.Diagnostics;
 using PlantForum.Dtos;
+using Microsoft.OpenApi.Models;
 
 namespace PlantForum
 {

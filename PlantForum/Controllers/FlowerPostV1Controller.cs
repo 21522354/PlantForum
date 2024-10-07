@@ -1,26 +1,24 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PlantForum.Data;
 using PlantForum.Data.Models;
+using PlantForum.Data;
 using PlantForum.Dtos;
-using System;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlantForum.Controllers
 {
-    [Route("api/v1/FlowerPost")]
+    [Route("api/v2/FlowerPost")]
     [ApiController]
-    [ControllerName("FlowerPostV1")]
-    public class FlowerPostController : ControllerBase
+    [ControllerName("FlowerPostV2")]
+    public class FlowerPostV1Controller : ControllerBase
     {
         private readonly PlanForumDBContext _context;
         private readonly IMapper _mapper;
 
-        public FlowerPostController(PlanForumDBContext context, IMapper mapper)
+        public FlowerPostV1Controller(PlanForumDBContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -30,7 +28,13 @@ namespace PlantForum.Controllers
         public async Task<IActionResult> GetFlowerPosts()
         {
             var flowerPosts = await _context.FlowerPosts.ToListAsync();
-            return Ok(_mapper.Map<IEnumerable<FlowerPostReadDto>>(flowerPosts));
+            var responseObject = new ResponseObject()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "Get flower posts successfully",
+                Data = _mapper.Map<IEnumerable<FlowerPostReadDto>>(flowerPosts)
+            };
+            return Ok(responseObject);
         }
 
         [HttpGet("GetFlowerPostById/{id}")]
@@ -40,10 +44,20 @@ namespace PlantForum.Controllers
 
             if (flowerPost == null)
             {
-                return NotFound();
+                return NotFound(new ResponseObject()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Cannot find the Post with id = " + id,
+                    Data = ""
+                });
             }
 
-            return Ok(_mapper.Map<FlowerPostReadDto>(flowerPost));
+            return Ok(new ResponseObject()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "Get flower post successfully",
+                Data = _mapper.Map<FlowerPostReadDto>(flowerPost)
+            });
         }
         [Authorize]
         [HttpPost("PostFlowerPost")]
@@ -51,7 +65,12 @@ namespace PlantForum.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new ResponseObject()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Message = "Some thing went wrong",
+                    Data = ""
+                });
             }
 
             flowerPostRequest.DateAdded = DateTime.UtcNow;
@@ -60,7 +79,12 @@ namespace PlantForum.Controllers
             await _context.SaveChangesAsync();
             var flowerPostRead = _mapper.Map<FlowerPostReadDto>(flowerPost);
 
-            return Ok(flowerPostRead);  
+            return Ok(new ResponseObject()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "Get flower post successfully",
+                Data = flowerPostRead
+            });
         }
         [Authorize]
         [HttpPut("UpdateFlowerPost/{id}")]
@@ -70,7 +94,12 @@ namespace PlantForum.Controllers
             var existingPost = await _context.FlowerPosts.FindAsync(id);
             if (existingPost == null)
             {
-                return NotFound();
+                return NotFound(new ResponseObject()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Cannot find the Post with id = " + id,
+                    Data = ""
+                });
             }
 
             // Update fields
@@ -81,9 +110,14 @@ namespace PlantForum.Controllers
             existingPost.ImageUrl = flowerPostRequest.ImageUrl;
             existingPost.UserId = flowerPostRequest.UserId;
 
-            await _context.SaveChangesAsync();  
+            await _context.SaveChangesAsync();
 
-            return Ok("Update post successfully");
+            return Ok(new ResponseObject()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "Update flower post successfully",
+                Data = ""
+            });
         }
         [Authorize]
         [HttpDelete("DeleteFlowerPost/{id}")]
@@ -92,13 +126,23 @@ namespace PlantForum.Controllers
             var flowerPost = await _context.FlowerPosts.FindAsync(id);
             if (flowerPost == null)
             {
-                return NotFound();
+                return NotFound(new ResponseObject()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Cannot find the Post with id = " + id,
+                    Data = ""
+                });
             }
 
             _context.FlowerPosts.Remove(flowerPost);
             await _context.SaveChangesAsync();
 
-            return Ok("Delete post successfully");
+            return Ok(new ResponseObject()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "Delete post successfully",
+                Data = ""
+            });
         }
 
         private bool FlowerPostExists(int id)
@@ -106,6 +150,4 @@ namespace PlantForum.Controllers
             return _context.FlowerPosts.Any(f => f.Id == id);
         }
     }
-
-
 }
