@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using PlantForum.Data;
 using System.Text;
+using Microsoft.AspNetCore.Diagnostics;
+using PlantForum.Dtos;
 
 namespace PlantForum
 {
@@ -64,6 +66,10 @@ namespace PlantForum
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseExceptionHandler("/error");
+
+            app.UseRouting();
 
             app.UseHttpsRedirection();
 
